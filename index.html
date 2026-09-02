@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AlbuminTrak - نظام متابعة وتجميع صرف الألبومين</title>
     
-  <!-- إعدادات التثبيت على الهاتف (PWA) -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0284c7">
-<link rel="apple-touch-icon" href="icon.svg">
-
-<!-- الأيقونة في تبويب المتصفح (Favicon) -->
-<link rel="icon" type="image/svg+xml" href="icon.svg">
+    <!-- إعدادات التثبيت على الهاتف (PWA) والأيقونة -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0284c7">
+    <link rel="apple-touch-icon" href="icon.svg">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -47,7 +45,6 @@
     <header class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-30 no-print">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <!-- اللوجو الجديد بتأثير زجاجي -->
                 <div class="relative w-12 h-12 rounded-xl bg-gradient-to-br from-brand-400 via-brand-600 to-brand-800 text-white flex items-center justify-center shadow-lg overflow-hidden border border-brand-300">
                     <div class="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/30 to-transparent"></div>
                     <span class="font-extrabold text-2xl tracking-tighter relative z-10 drop-shadow-md pt-1">AT</span>
@@ -84,7 +81,6 @@
             <p style="font-size: 10pt; color: #444;">تاريخ الطباعة: <span id="printDate"></span></p>
         </div>
 
-        <!-- إدخال البيانات -->
         <section id="entryTab" class="block">
             <div class="max-w-2xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200/80">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
@@ -151,7 +147,6 @@
             </div>
         </section>
 
-        <!-- السجل المجمع -->
         <section id="registerTab" class="hidden">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
                 <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 no-print">
@@ -198,7 +193,6 @@
         </section>
     </main>
 
-    <!-- النوافذ المنبثقة تبقى كما هي في الكود السابق... -->
     <!-- نافذة التعديل -->
     <div id="editModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl border border-slate-100 p-6 space-y-4">
@@ -244,6 +238,7 @@
         </div>
     </div>
 
+    <!-- نافذة الرسائل المخصصة -->
     <div id="customModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl border border-slate-100 p-6 text-center space-y-4">
             <div id="modalIcon" class="w-12 h-12 rounded-full mx-auto flex items-center justify-center text-xl"></div>
@@ -253,10 +248,49 @@
         </div>
     </div>
 
+    <!-- مكتبات Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
     <script>
         // تسجيل Service Worker لتفعيل التثبيت (PWA)
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error:', err));
+        }
+
+        // إعدادات Firebase الخاصة بك
+        const firebaseConfig = {
+            apiKey: "AIzaSyAWIfG8ZSyKdzq_BcKOAZsi-dcQ8xpQF58",
+            authDomain: "albumintrak.firebaseapp.com",
+            projectId: "albumintrak",
+            storageBucket: "albumintrak.firebasestorage.app",
+            messagingSenderId: "393068393466",
+            appId: "1:393068393466:web:ee944450b85cf1d9576a43"
+        };
+
+        let db = null;
+        let isFirebaseInitialized = false;
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            
+            // تفعيل العمل بدون إنترنت والمزامنة
+            db.enablePersistence()
+                .then(() => {
+                    isFirebaseInitialized = true;
+                    console.log("تم تفعيل قاعدة البيانات بنجاح (مع دعم الأوفلاين)");
+                })
+                .catch((err) => {
+                    if (err.code == 'failed-precondition') {
+                        console.warn("تعذر تفعيل الأوفلاين: التطبيق مفتوح في تبويبات متعددة.");
+                    } else if (err.code == 'unimplemented') {
+                        console.warn("المتصفح الحالي لا يدعم ميزة العمل بدون إنترنت.");
+                    }
+                    isFirebaseInitialized = true;
+                });
+        } catch (e) {
+            console.error("خطأ في تهيئة Firebase:", e);
         }
 
         document.getElementById('orderDate').value = new Date().toISOString().slice(0, 10);
@@ -315,7 +349,21 @@
                 orderDate: fullDate,
                 monthYear: monthYear 
             };
-            const records = getLocalRecords(); records.push(record); saveLocalRecords(records);
+            
+            // الحفظ المحلي
+            const records = getLocalRecords(); 
+            records.push(record); 
+            saveLocalRecords(records);
+
+            // الحفظ السحابي
+            if (isFirebaseInitialized && db) {
+                try {
+                    await db.collection('albumin_orders').doc(record.id).set(record);
+                } catch (err) {
+                    console.log('مزامنة سحابية متأخرة');
+                }
+            }
+
             showModal('success', 'تم الحفظ بنجاح', 'تم تسجيل طلب صرف الألبومين بنجاح.');
             document.getElementById('patientForm').reset();
             document.getElementById('orderDate').value = new Date().toISOString().slice(0, 10);
@@ -384,16 +432,32 @@
             document.getElementById('editOrderDate').value = rec.orderDate; document.getElementById('editModal').classList.remove('hidden');
         }
         function closeEditModal() { document.getElementById('editModal').classList.add('hidden'); }
-        function handleEditSubmit(e) {
-            e.preventDefault(); const id = document.getElementById('editRecordId').value; let recs = getLocalRecords();
+        
+        async function handleEditSubmit(e) {
+            e.preventDefault(); 
+            const id = document.getElementById('editRecordId').value; 
+            let recs = getLocalRecords();
             const idx = recs.findIndex(r => r.id === id);
+            
             if (idx !== -1) {
                 const newDate = document.getElementById('editOrderDate').value;
-                recs[idx].patientName = document.getElementById('editPatientName').value; recs[idx].recordNumber = document.getElementById('editRecordNumber').value;
-                recs[idx].quantity = parseInt(document.getElementById('editQuantity').value); recs[idx].diagnosis = document.getElementById('editDiagnosis').value;
+                recs[idx].patientName = document.getElementById('editPatientName').value; 
+                recs[idx].recordNumber = document.getElementById('editRecordNumber').value;
+                recs[idx].quantity = parseInt(document.getElementById('editQuantity').value); 
+                recs[idx].diagnosis = document.getElementById('editDiagnosis').value;
                 recs[idx].doctorName = document.getElementById('editDoctorName').value; 
-                recs[idx].orderDate = newDate; recs[idx].monthYear = newDate.substring(0, 7);
-                saveLocalRecords(recs); renderRegisterTable(); closeEditModal(); showModal('success', 'تم', 'تم حفظ التعديلات.');
+                recs[idx].orderDate = newDate; 
+                recs[idx].monthYear = newDate.substring(0, 7);
+                
+                saveLocalRecords(recs); 
+                
+                if (isFirebaseInitialized && db) {
+                    try { await db.collection('albumin_orders').doc(id).update(recs[idx]); } catch (err) {}
+                }
+
+                renderRegisterTable(); 
+                closeEditModal(); 
+                showModal('success', 'تم', 'تم حفظ التعديلات.');
             }
         }
 
@@ -401,9 +465,18 @@
             const ids = idsStr.split(',');
             showConfirmModal('تأكيد الحذف', 'هل أنت متأكد من حذف هذا السجل؟', () => {
                 saveLocalRecords(getLocalRecords().filter(r => !ids.includes(r.id)));
-                renderRegisterTable(); showModal('success', 'تم الحذف', 'تم حذف السجل بنجاح.');
+                
+                if (isFirebaseInitialized && db) {
+                    ids.forEach(id => {
+                        try { db.collection('albumin_orders').doc(id).delete(); } catch(err) {}
+                    });
+                }
+
+                renderRegisterTable(); 
+                showModal('success', 'تم الحذف', 'تم حذف السجل بنجاح.');
             });
         }
+
         function showModal(type, title, msg) {
             document.getElementById('modalTitle').innerText = title; document.getElementById('modalMessage').innerText = msg;
             const icon = document.getElementById('modalIcon');
@@ -433,6 +506,21 @@
         function triggerPrint() {
             document.getElementById('printDate').innerText = new Date().toLocaleDateString('ar-IQ');
             window.print();
+        }
+
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+
+        function updateOnlineStatus() {
+            const statusEl = document.getElementById('syncStatus');
+            const statusText = document.getElementById('statusText');
+            if (navigator.onLine) {
+                statusEl.className = "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm";
+                statusText.innerText = "متصل بالسحابة";
+            } else {
+                statusEl.className = "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 shadow-sm";
+                statusText.innerText = "يعمل محلياً (Offline)";
+            }
         }
     </script>
 </body>
