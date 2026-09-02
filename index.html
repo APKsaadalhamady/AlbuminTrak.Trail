@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AlbuminTrak - نظام متابعة وتجميع صرف الألبومين</title>
+    <title>AlbuminTrak - نظام إدارة وصرف الألبومين</title>
     
-    <!-- إعدادات التثبيت على الهاتف (PWA) والأيقونة -->
+    <!-- إعدادات التثبيت (PWA) والأيقونة -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0284c7">
     <link rel="apple-touch-icon" href="icon.svg">
@@ -280,6 +280,7 @@
                 .then(() => {
                     isFirebaseInitialized = true;
                     console.log("تم تفعيل قاعدة البيانات بنجاح (مع دعم الأوفلاين)");
+                    startRealtimeSync(); 
                 })
                 .catch((err) => {
                     if (err.code == 'failed-precondition') {
@@ -288,9 +289,32 @@
                         console.warn("المتصفح الحالي لا يدعم ميزة العمل بدون إنترنت.");
                     }
                     isFirebaseInitialized = true;
+                    startRealtimeSync(); 
                 });
         } catch (e) {
             console.error("خطأ في تهيئة Firebase:", e);
+        }
+
+        // دالة سحب البيانات اللحظية من السحابة وتحديث الجهاز
+        function startRealtimeSync() {
+            if (!db) return;
+            
+            db.collection('albumin_orders').onSnapshot((snapshot) => {
+                const cloudRecords = [];
+                snapshot.forEach((doc) => {
+                    cloudRecords.push(doc.data());
+                });
+                
+                // تحديث الذاكرة المحلية للجهاز بالبيانات القادمة من السحابة
+                saveLocalRecords(cloudRecords);
+                
+                // إعادة رسم الجدول فوراً إذا كان المستخدم يتصفح السجل
+                if (!document.getElementById('registerTab').classList.contains('hidden')) {
+                    renderRegisterTable();
+                }
+            }, (error) => {
+                console.error("خطأ في المزامنة اللحظية: ", error);
+            });
         }
 
         document.getElementById('orderDate').value = new Date().toISOString().slice(0, 10);
@@ -350,7 +374,7 @@
                 monthYear: monthYear 
             };
             
-            // الحفظ المحلي
+            // الحفظ المحلي لسرعة الأداء
             const records = getLocalRecords(); 
             records.push(record); 
             saveLocalRecords(records);
@@ -360,7 +384,7 @@
                 try {
                     await db.collection('albumin_orders').doc(record.id).set(record);
                 } catch (err) {
-                    console.log('مزامنة سحابية متأخرة');
+                    console.log('سيتم المزامنة لاحقاً عند توفر الاتصال');
                 }
             }
 
@@ -399,7 +423,7 @@
             let data = aggregateRecords(records);
             if (filter) data = data.filter(d => d.monthYear === filter);
 
-            if (data.length === 0) { tb.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-400">لا توجد بيانات</td></tr>`; return; }
+            if (data.length === 0) { tb.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-400">لا توجد بيانات مسجلة</td></tr>`; return; }
 
             tb.innerHTML = data.map((item, i) => {
                 const sortedDays = item.days.sort((a,b) => parseInt(a) - parseInt(b)).join(' ، ');
@@ -414,8 +438,8 @@
                     <td class="p-3.5"><span class="px-2 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">${item.totalQuantity}</span></td>
                     <td class="p-3.5 text-xs font-mono">${item.monthYear}</td>
                     <td class="p-3.5 text-center no-print">
-                        <button onclick="openEditModal('${item.rawItems[0].id}')" class="text-brand-600 mx-1">تعديل</button>
-                        <button onclick="confirmDelete('${item.ids.join(',')}')" class="text-rose-600 mx-1">حذف</button>
+                        <button onclick="openEditModal('${item.rawItems[0].id}')" class="text-brand-600 mx-1 font-bold">تعديل</button>
+                        <button onclick="confirmDelete('${item.ids.join(',')}')" class="text-rose-600 mx-1 font-bold">حذف</button>
                     </td>
                 </tr>`
             }).join('');
@@ -449,8 +473,10 @@
                 recs[idx].orderDate = newDate; 
                 recs[idx].monthYear = newDate.substring(0, 7);
                 
+                // حفظ محلي
                 saveLocalRecords(recs); 
                 
+                // حفظ سحابي للتعديل
                 if (isFirebaseInitialized && db) {
                     try { await db.collection('albumin_orders').doc(id).update(recs[idx]); } catch (err) {}
                 }
@@ -463,9 +489,11 @@
 
         function confirmDelete(idsStr) {
             const ids = idsStr.split(',');
-            showConfirmModal('تأكيد الحذف', 'هل أنت متأكد من حذف هذا السجل؟', () => {
+            showConfirmModal('تأكيد الحذف', 'هل أنت متأكد من حذف هذا السجل نهائياً؟', () => {
+                // حذف محلي
                 saveLocalRecords(getLocalRecords().filter(r => !ids.includes(r.id)));
                 
+                // حذف سحابي لجميع المعرفات المرتبطة بهذا السجل
                 if (isFirebaseInitialized && db) {
                     ids.forEach(id => {
                         try { db.collection('albumin_orders').doc(id).delete(); } catch(err) {}
@@ -482,7 +510,7 @@
             const icon = document.getElementById('modalIcon');
             icon.className = type === 'success' ? "w-12 h-12 rounded-full mx-auto flex items-center justify-center bg-emerald-100 text-emerald-600" : "w-12 h-12 rounded-full mx-auto flex items-center justify-center bg-amber-100 text-amber-600";
             icon.innerHTML = type === 'success' ? "✓" : "!";
-            document.getElementById('modalActions').innerHTML = `<button onclick="document.getElementById('customModal').classList.add('hidden')" class="px-5 py-2 bg-slate-800 text-white font-bold text-xs rounded-xl">حسناً</button>`;
+            document.getElementById('modalActions').innerHTML = `<button onclick="document.getElementById('customModal').classList.add('hidden')" class="px-5 py-2 bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm">حسناً</button>`;
             document.getElementById('customModal').classList.remove('hidden');
         }
         function showConfirmModal(title, msg, onConfirm) {
@@ -491,14 +519,14 @@
             window.pendingConfirmAction = onConfirm;
             document.getElementById('modalActions').innerHTML = `
                 <button onclick="document.getElementById('customModal').classList.add('hidden')" class="px-4 py-2 bg-slate-100 text-slate-700 font-semibold text-xs rounded-xl">إلغاء</button>
-                <button onclick="if(window.pendingConfirmAction)window.pendingConfirmAction(); document.getElementById('customModal').classList.add('hidden')" class="px-4 py-2 bg-rose-600 text-white font-bold text-xs rounded-xl">تأكيد الحذف</button>`;
+                <button onclick="if(window.pendingConfirmAction)window.pendingConfirmAction(); document.getElementById('customModal').classList.add('hidden')" class="px-4 py-2 bg-rose-600 text-white font-bold text-xs rounded-xl shadow-sm">تأكيد الحذف</button>`;
             document.getElementById('customModal').classList.remove('hidden');
         }
 
         function exportToExcel() {
             const data = aggregateRecords(getLocalRecords());
             if (!data.length) return showModal('error', 'فارغ', 'لا توجد بيانات للتصدير');
-            const rows = data.map((item, idx) => ({"ت": idx+1, "اسم المريض": item.patientName, "الرقم الإحصائي": item.recordNumber, "التشخيص": item.diagnoses.join(' / '), "الطبيب": item.doctors.join(' - '), "أيام الصرف": item.days.sort((a,b)=>a-b).join(' ، '), "العدد": item.totalQuantity, "الشهر/السنة": item.monthYear}));
+            const rows = data.map((item, idx) => ({"ت": idx+1, "اسم المريض": item.patientName, "الرقم الإحصائي": item.recordNumber, "التشخيص": item.diagnoses.join(' / '), "الطبيب": item.doctors.join(' - '), "أيام الصرف": item.days.sort((a,b)=>a-b).join(' ، '), "العدد (فيال)": item.totalQuantity, "الشهر/السنة": item.monthYear}));
             const ws = XLSX.utils.json_to_sheet(rows); ws['!dir'] = "rtl";
             const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "سجل الألبومين");
             XLSX.writeFile(wb, `AlbuminTrak_${new Date().toISOString().slice(0, 10)}.xlsx`);
