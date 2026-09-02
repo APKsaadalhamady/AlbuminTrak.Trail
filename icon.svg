@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+    <!-- السائل داخل الفيال (ألبومين) -->
+    <path d="M 152 280 L 360 280 L 360 400 A 48 48 0 0 1 312 448 L 200 448 A 48 48 0 0 1 152 400 Z" fill="#bae6fd" />
+    
+    <!-- الإطار الخارجي لزجاجة الفيال -->
+    <rect x="136" y="144" width="240" height="320" rx="64" fill="none" stroke="#0369a1" stroke-width="32" />
+    
+    <!-- خطوط الجرعات (Tick Marks) على الجانب -->
+    <line x1="344" y1="216" x2="376" y2="216" stroke="#0369a1" stroke-width="12" stroke-linecap="round" />
+    <line x1="344" y1="280" x2="376" y2="280" stroke="#0369a1" stroke-width="12" stroke-linecap="round" />
+    <line x1="344" y1="344" x2="376" y2="344" stroke="#0369a1" stroke-width="12" stroke-linecap="round" />
+    <line x1="344" y1="408" x2="376" y2="408" stroke="#0369a1" stroke-width="12" stroke-linecap="round" />
+    
+    <!-- لمعة الزجاج (Reflection) لإعطاء طابع عصري -->
+    <line x1="176" y1="192" x2="176" y2="416" stroke="#ffffff" stroke-width="16" stroke-linecap="round" opacity="0.7" />
+    
+    <!-- عنق الزجاجة -->
+    <rect x="220" y="96" width="72" height="48" fill="#0369a1" />
+    
+    <!-- غطاء الفيال -->
+    <rect x="192" y="48" width="128" height="48" rx="16" fill="#075985" />
+    
+    <!-- خلفية بيضاء لخط التتبع لخلق تأثير القص (Negative Space Cutout) -->
+    <g fill="none" stroke="#ffffff" stroke-width="56" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="72,320 160,320 248,176 312,264 424,152" />
+        <polyline points="336,152 424,152 424,240" />
+    </g>
+    
+    <!-- خط التتبع والمتابعة (Tracking Line - بلون أخضر زمردي) -->
+    <g fill="none" stroke="#10b981" stroke-width="32" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="72,320 160,320 248,176 312,264 424,152" />
+        <polyline points="336,152 424,152 424,240" />
+    </g>
+    
+    <!-- نقاط ارتكاز خط التتبع (Nodes) -->
+    <circle cx="160" cy="320" r="16" fill="#10b981" stroke="#ffffff" stroke-width="8" />
+    <circle cx="248" cy="176" r="16" fill="#10b981" stroke="#ffffff" stroke-width="8" />
+    <circle cx="312" cy="264" r="16" fill="#10b981" stroke="#ffffff" stroke-width="8" />
+</svg>
