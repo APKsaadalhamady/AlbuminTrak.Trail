@@ -2,8 +2,17 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AlbuminTrak - نظام متابعة وتجميع صرف الألبومين</title>
+    
+    <!-- إعدادات التثبيت على الهاتف (PWA) -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0284c7">
+    <link rel="apple-touch-icon" href="icon.svg">
+    
+    <!-- Favicon الأيقونة في تبويب المتصفح -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230284c7'/><text x='50%' y='56%' font-family='Arial, sans-serif' font-weight='900' font-size='42' fill='white' text-anchor='middle' dominant-baseline='middle'>AT</text><circle cx='80' cy='80' r='16' fill='%2310b981'/></svg>">
+    
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -12,13 +21,13 @@
             theme: {
                 extend: {
                     fontFamily: { cairo: ['Cairo', 'sans-serif'] },
-                    colors: { brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0284c7', 600: '#0369a1', 700: '#075985' } }
+                    colors: { brand: { 50: '#f0f9ff', 100: '#e0f2fe', 400: '#38bdf8', 500: '#0284c7', 600: '#0369a1', 700: '#075985', 800: '#0c4a6e' } }
                 }
             }
         }
     </script>
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; }
+        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         .tab-btn.active { border-bottom: 3px solid #0284c7; color: #0284c7; font-weight: 700; background-color: #f0f9ff; }
         @media print {
             .no-print, header, #entryTab, .tab-btn, button, input, select, .action-cols { display: none !important; }
@@ -38,24 +47,33 @@
     <header class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-30 no-print">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-brand-700 to-brand-500 text-white flex items-center justify-center font-extrabold text-2xl shadow-md">AT</div>
+                <!-- اللوجو الجديد بتأثير زجاجي -->
+                <div class="relative w-12 h-12 rounded-xl bg-gradient-to-br from-brand-400 via-brand-600 to-brand-800 text-white flex items-center justify-center shadow-lg overflow-hidden border border-brand-300">
+                    <div class="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/30 to-transparent"></div>
+                    <span class="font-extrabold text-2xl tracking-tighter relative z-10 drop-shadow-md pt-1">AT</span>
+                    <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center z-20 shadow-sm">
+                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                </div>
                 <div>
                     <h1 class="text-xl font-extrabold text-slate-900 tracking-tight leading-tight">AlbuminTrak</h1>
-                    <p class="text-xs font-semibold text-slate-500">نظام إدخال وتجميع طلبات صرف الألبومين للمرضى الراقدين</p>
+                    <p class="text-xs font-semibold text-slate-500">نظام إدارة وصرف الألبومين</p>
                 </div>
             </div>
             <div id="syncStatus" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span id="statusText">متصل بالسحابة</span>
+                <span id="statusText" class="hidden sm:inline">متصل بالسحابة</span>
             </div>
         </div>
 
         <div class="max-w-7xl mx-auto px-4 flex border-t border-slate-100">
-            <button id="tabEntryBtn" onclick="switchTab('entry')" class="tab-btn active py-3 px-6 text-slate-600 hover:text-brand-600 transition flex items-center gap-2 text-sm">
-                <span>📝 إدخال البيانات</span>
+            <button id="tabEntryBtn" onclick="switchTab('entry')" class="tab-btn active py-3 px-4 sm:px-6 text-slate-600 hover:text-brand-600 transition flex items-center gap-2 text-sm flex-1 sm:flex-none justify-center">
+                <span>📝 الإدخال</span>
             </button>
-            <button id="tabRegisterBtn" onclick="switchTab('register')" class="tab-btn py-3 px-6 text-slate-600 hover:text-brand-600 transition flex items-center gap-2 text-sm">
-                <span>📊 السجل المجمع</span>
+            <button id="tabRegisterBtn" onclick="switchTab('register')" class="tab-btn py-3 px-4 sm:px-6 text-slate-600 hover:text-brand-600 transition flex items-center gap-2 text-sm flex-1 sm:flex-none justify-center">
+                <span>📊 السجل</span>
             </button>
         </div>
     </header>
@@ -78,7 +96,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div class="sm:col-span-2 relative">
                             <label class="block text-sm font-semibold text-slate-700 mb-1">الرقم الإحصائي / الطبقي *</label>
-                            <input type="text" id="recordNumber" required placeholder="أدخل الرقم الإحصائي للتأكد من وجود سجل سابق..." 
+                            <input type="text" id="recordNumber" required placeholder="أدخل الرقم الإحصائي..." 
                                    oninput="checkAutoSuggest(this.value)" autocomplete="off"
                                    class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition text-sm">
                             
@@ -86,15 +104,15 @@
                                 <div class="flex items-center justify-between font-bold text-brand-800">
                                     <span class="flex items-center gap-1.5">
                                         <svg class="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 10 11-18 0 9 9 0 0118 0z"></path></svg>
-                                        تم العثور على سجل سابق مرتبط بهذا الرقم!
+                                        سجل سابق مرتبط بهذا الرقم
                                     </span>
                                 </div>
                                 <div class="text-slate-600 space-y-1 bg-white/70 p-2.5 rounded-lg border border-brand-100">
-                                    <div><strong>اسم المريض:</strong> <span id="sugPatientName" class="text-slate-900 font-semibold"></span></div>
-                                    <div><strong>التشخيص الطبي:</strong> <span id="sugDiagnosis" class="text-slate-900"></span></div>
+                                    <div><strong>الاسم:</strong> <span id="sugPatientName" class="text-slate-900 font-semibold"></span></div>
+                                    <div><strong>التشخيص:</strong> <span id="sugDiagnosis" class="text-slate-900"></span></div>
                                 </div>
                                 <div class="flex items-center gap-2 pt-1">
-                                    <button type="button" onclick="applySuggestion()" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-lg transition shadow-sm">تعبئة البيانات تلقائياً</button>
+                                    <button type="button" onclick="applySuggestion()" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-lg transition shadow-sm">تعبئة تلقائية</button>
                                     <button type="button" onclick="dismissSuggestion()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg transition">تجاهل</button>
                                 </div>
                             </div>
@@ -102,7 +120,7 @@
 
                         <div class="sm:col-span-2">
                             <label class="block text-sm font-semibold text-slate-700 mb-1">اسم المريض الرباعي *</label>
-                            <input type="text" id="patientName" required placeholder="مثال: أحمد عبد الله محمد علي" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none transition text-sm">
+                            <input type="text" id="patientName" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none transition text-sm">
                         </div>
 
                         <div>
@@ -111,18 +129,18 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-1">تاريخ الصرف (اليوم/الشهر/السنة) *</label>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">تاريخ الصرف *</label>
                             <input type="date" id="orderDate" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none transition text-sm">
                         </div>
 
                         <div class="sm:col-span-2">
                             <label class="block text-sm font-semibold text-slate-700 mb-1">التشخيص الطبي الكامل *</label>
-                            <textarea id="diagnosis" rows="2" required placeholder="اكتب التشخيص كاملا..." class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none transition text-sm"></textarea>
+                            <textarea id="diagnosis" rows="2" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none transition text-sm"></textarea>
                         </div>
 
                         <div class="sm:col-span-2">
                             <label class="block text-sm font-semibold text-slate-700 mb-1">اسم الطبيب المعالج *</label>
-                            <input type="text" id="doctorName" required placeholder="د. علي الحسين" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none transition text-sm">
+                            <input type="text" id="doctorName" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none transition text-sm">
                         </div>
                     </div>
 
@@ -138,29 +156,28 @@
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
                 <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 no-print">
                     <div>
-                        <h2 class="text-xl font-bold text-slate-800">السجل المجمع للألبومين المصروف</h2>
-                        <p class="text-xs text-slate-500 mt-1">تجميع السجلات والكميات والأطباء تلقائياً لنفس المريض خلال الشهر</p>
+                        <h2 class="text-xl font-bold text-slate-800">السجل المجمع للألبومين</h2>
                     </div>
                     
                     <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-                        <div class="flex items-center gap-2 border border-slate-200 p-1.5 rounded-xl bg-slate-50">
+                        <div class="flex items-center gap-2 border border-slate-200 p-1.5 rounded-xl bg-slate-50 w-full sm:w-auto">
                             <label class="text-xs font-semibold text-slate-600 pr-1">الشهر:</label>
-                            <input type="month" id="filterMonth" onchange="renderRegisterTable()" class="px-2.5 py-1 border border-slate-300 rounded-lg text-xs outline-none bg-white">
+                            <input type="month" id="filterMonth" onchange="renderRegisterTable()" class="px-2.5 py-1 border border-slate-300 rounded-lg text-xs outline-none bg-white flex-1 sm:flex-none">
                             <button onclick="clearFilter()" class="text-xs text-slate-500 hover:text-slate-800 px-1 underline">الكل</button>
                         </div>
 
-                        <button onclick="exportToExcel()" class="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition">
+                        <button onclick="exportToExcel()" class="flex items-center justify-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex-1 sm:flex-none">
                             تصدير Excel
                         </button>
                         
-                        <button onclick="triggerPrint()" class="flex items-center gap-1.5 px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-xl shadow-sm transition">
-                            طباعة السجل
+                        <button onclick="triggerPrint()" class="flex items-center justify-center gap-1.5 px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-xl shadow-sm transition flex-1 sm:flex-none">
+                            طباعة
                         </button>
                     </div>
                 </div>
 
                 <div class="overflow-x-auto rounded-xl border border-slate-200">
-                    <table class="w-full text-right text-sm">
+                    <table class="w-full text-right text-sm min-w-[800px]">
                         <thead class="bg-slate-50 text-slate-700 border-b border-slate-200">
                             <tr>
                                 <th class="p-3.5 font-bold text-xs">ت</th>
@@ -181,10 +198,7 @@
         </section>
     </main>
 
-    <footer class="py-4 text-center text-xs text-slate-400 no-print border-t border-slate-100 bg-white">
-        AlbuminTrak &copy; 2026 - نظام إدارة وصرف الألبومين الذكي
-    </footer>
-
+    <!-- النوافذ المنبثقة تبقى كما هي في الكود السابق... -->
     <!-- نافذة التعديل -->
     <div id="editModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl border border-slate-100 p-6 space-y-4">
@@ -230,7 +244,6 @@
         </div>
     </div>
 
-    <!-- نافذة الرسائل المخصصة (Alerts) -->
     <div id="customModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl border border-slate-100 p-6 text-center space-y-4">
             <div id="modalIcon" class="w-12 h-12 rounded-full mx-auto flex items-center justify-center text-xl"></div>
@@ -240,11 +253,12 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
     <script>
-        // إعداد تاريخ اليوم كافتراضي
+        // تسجيل Service Worker لتفعيل التثبيت (PWA)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error:', err));
+        }
+
         document.getElementById('orderDate').value = new Date().toISOString().slice(0, 10);
         let currentSuggestionData = null;
 
@@ -274,9 +288,7 @@
                 document.getElementById('sugPatientName').innerText = found.patientName;
                 document.getElementById('sugDiagnosis').innerText = found.diagnosis;
                 card.classList.remove('hidden');
-            } else {
-                card.classList.add('hidden'); currentSuggestionData = null;
-            }
+            } else { card.classList.add('hidden'); currentSuggestionData = null; }
         }
 
         function applySuggestion() {
@@ -291,9 +303,8 @@
 
         async function handleFormSubmit(e) {
             e.preventDefault();
-            const fullDate = document.getElementById('orderDate').value; // YYYY-MM-DD
-            const monthYear = fullDate.substring(0, 7); // استخراج الشهر والسنة للتجميع
-
+            const fullDate = document.getElementById('orderDate').value; 
+            const monthYear = fullDate.substring(0, 7); 
             const record = {
                 id: Date.now().toString(),
                 patientName: document.getElementById('patientName').value.trim(),
@@ -305,7 +316,6 @@
                 monthYear: monthYear 
             };
             const records = getLocalRecords(); records.push(record); saveLocalRecords(records);
-            
             showModal('success', 'تم الحفظ بنجاح', 'تم تسجيل طلب صرف الألبومين بنجاح.');
             document.getElementById('patientForm').reset();
             document.getElementById('orderDate').value = new Date().toISOString().slice(0, 10);
@@ -315,12 +325,8 @@
         function aggregateRecords(rawRecords) {
             const map = new Map();
             rawRecords.forEach(item => {
-                // نجمع بناءً على الرقم الإحصائي والاسم والشهر
                 const key = `${item.recordNumber}_${item.patientName.trim()}_${item.monthYear}`;
-                
-                // استخراج اليوم فقط من التاريخ (مثال: 2026-09-02 -> 02)
                 const day = item.orderDate ? item.orderDate.substring(8, 10) : '';
-
                 if (!map.has(key)) {
                     map.set(key, {
                         ids: [item.id], patientName: item.patientName.trim(), recordNumber: item.recordNumber.trim(),
@@ -332,7 +338,7 @@
                     const ex = map.get(key); ex.ids.push(item.id); ex.totalQuantity += item.quantity; ex.rawItems.push(item);
                     if (!ex.doctors.includes(item.doctorName.trim())) ex.doctors.push(item.doctorName.trim());
                     if (!ex.diagnoses.includes(item.diagnosis.trim())) ex.diagnoses.push(item.diagnosis.trim());
-                    if (day && !ex.days.includes(day)) ex.days.push(day); // إضافة اليوم للقائمة دون تكرار
+                    if (day && !ex.days.includes(day)) ex.days.push(day); 
                 }
             });
             return Array.from(map.values());
@@ -348,7 +354,6 @@
             if (data.length === 0) { tb.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-400">لا توجد بيانات</td></tr>`; return; }
 
             tb.innerHTML = data.map((item, i) => {
-                // ترتيب الأيام تصاعدياً لعرضها بشكل جميل
                 const sortedDays = item.days.sort((a,b) => parseInt(a) - parseInt(b)).join(' ، ');
                 return `
                 <tr class="hover:bg-slate-50 border-b border-slate-100">
@@ -358,7 +363,7 @@
                     <td class="p-3.5 text-xs">${item.diagnoses.join(' / ')}</td>
                     <td class="p-3.5 text-xs text-brand-700">${item.doctors.join(' - ')}</td>
                     <td class="p-3.5 text-xs text-center font-bold text-slate-600" dir="ltr">${sortedDays}</td>
-                    <td class="p-3.5"><span class="px-2 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">${item.totalQuantity} فيال</span></td>
+                    <td class="p-3.5"><span class="px-2 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">${item.totalQuantity}</span></td>
                     <td class="p-3.5 text-xs font-mono">${item.monthYear}</td>
                     <td class="p-3.5 text-center no-print">
                         <button onclick="openEditModal('${item.rawItems[0].id}')" class="text-brand-600 mx-1">تعديل</button>
@@ -370,7 +375,6 @@
 
         function clearFilter() { document.getElementById('filterMonth').value = ''; renderRegisterTable(); }
 
-        // التعديل
         function openEditModal(id) {
             const rec = getLocalRecords().find(r => r.id === id);
             if (!rec) return;
@@ -395,7 +399,7 @@
 
         function confirmDelete(idsStr) {
             const ids = idsStr.split(',');
-            showConfirmModal('تأكيد الحذف', 'هل أنت متأكد من حذف هذا السجل نهائياً؟', () => {
+            showConfirmModal('تأكيد الحذف', 'هل أنت متأكد من حذف هذا السجل؟', () => {
                 saveLocalRecords(getLocalRecords().filter(r => !ids.includes(r.id)));
                 renderRegisterTable(); showModal('success', 'تم الحذف', 'تم حذف السجل بنجاح.');
             });
@@ -421,7 +425,7 @@
         function exportToExcel() {
             const data = aggregateRecords(getLocalRecords());
             if (!data.length) return showModal('error', 'فارغ', 'لا توجد بيانات للتصدير');
-            const rows = data.map((item, idx) => ({"ت": idx+1, "اسم المريض": item.patientName, "الرقم الإحصائي": item.recordNumber, "التشخيص": item.diagnoses.join(' / '), "الطبيب": item.doctors.join(' - '), "أيام الصرف": item.days.sort((a,b)=>a-b).join(' ، '), "العدد (فيال)": item.totalQuantity, "الشهر/السنة": item.monthYear}));
+            const rows = data.map((item, idx) => ({"ت": idx+1, "اسم المريض": item.patientName, "الرقم الإحصائي": item.recordNumber, "التشخيص": item.diagnoses.join(' / '), "الطبيب": item.doctors.join(' - '), "أيام الصرف": item.days.sort((a,b)=>a-b).join(' ، '), "العدد": item.totalQuantity, "الشهر/السنة": item.monthYear}));
             const ws = XLSX.utils.json_to_sheet(rows); ws['!dir'] = "rtl";
             const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "سجل الألبومين");
             XLSX.writeFile(wb, `AlbuminTrak_${new Date().toISOString().slice(0, 10)}.xlsx`);
