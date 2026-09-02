@@ -1,7 +1,7 @@
 {
   "name": "AlbuminTrak",
   "short_name": "AlbuminTrak",
-  "description": "نظام متابعة وتجميع صرف الألبومين",
+  "description": "نظام إدارة وصرف الألبومين",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f8fafc",
@@ -9,7 +9,7 @@
   "icons": [
     {
       "src": "icon.svg",
-      "sizes": "192x192 512x512",
+      "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
