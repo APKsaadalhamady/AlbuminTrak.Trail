@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AlbuminTrak - نظام إدارة وصرف الألبومين</title>
     
-    <!-- إعدادات التثبيت (PWA) والأيقونة -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0284c7">
-    <link rel="apple-touch-icon" href="icon.svg?v=2">
-    <link rel="icon" type="image/svg+xml" href="icon.svg?v=2">
+    <link rel="apple-touch-icon" href="icon.svg?v=3">
+    <link rel="icon" type="image/svg+xml" href="icon.svg?v=3">
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -28,9 +27,10 @@
         body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         .tab-btn.active { border-bottom: 3px solid #0284c7; color: #0284c7; font-weight: 700; background-color: #f0f9ff; }
         @media print {
-            .no-print, header, #entryTab, .tab-btn, button, input, select, .action-cols { display: none !important; }
+            .no-print, header, .tab-btn, button, input, select, .action-cols { display: none !important; }
             body { background: white !important; font-size: 12pt; }
             main { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+            section { display: none !important; }
             #registerTab { display: block !important; border: none; box-shadow: none; }
             .print-only-header { display: block !important; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
             table { width: 100% !important; border-collapse: collapse !important; }
@@ -45,7 +45,7 @@
     <header class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-30 no-print">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <img src="icon.svg?v=2" alt="AlbuminTrak Logo" class="w-12 h-12 drop-shadow-md hover:scale-105 transition-transform">
+                <img src="icon.svg?v=3" alt="AlbuminTrak Logo" class="w-12 h-12 drop-shadow-md hover:scale-105 transition-transform">
                 <div>
                     <h1 class="text-xl font-extrabold text-slate-900 tracking-tight leading-tight">AlbuminTrak</h1>
                     <p class="text-xs font-semibold text-slate-500">نظام إدارة وصرف الألبومين</p>
@@ -57,12 +57,15 @@
             </div>
         </div>
 
-        <div class="max-w-7xl mx-auto px-4 flex border-t border-slate-100">
-            <button id="tabEntryBtn" onclick="switchTab('entry')" class="tab-btn active py-3 px-4 sm:px-6 text-slate-600 hover:text-brand-600 transition flex items-center gap-2 text-sm flex-1 sm:flex-none justify-center">
+        <div class="max-w-7xl mx-auto px-4 flex border-t border-slate-100 overflow-x-auto no-scrollbar">
+            <button id="tabEntryBtn" onclick="switchTab('entry')" class="tab-btn active py-3 px-4 sm:px-6 text-slate-600 hover:text-brand-600 transition flex items-center gap-2 text-sm whitespace-nowrap">
                 <span>📝 الإدخال</span>
             </button>
-            <button id="tabRegisterBtn" onclick="switchTab('register')" class="tab-btn py-3 px-4 sm:px-6 text-slate-600 hover:text-brand-600 transition flex items-center gap-2 text-sm flex-1 sm:flex-none justify-center">
+            <button id="tabRegisterBtn" onclick="switchTab('register')" class="tab-btn py-3 px-4 sm:px-6 text-slate-600 hover:text-brand-600 transition flex items-center gap-2 text-sm whitespace-nowrap">
                 <span>📊 السجل</span>
+            </button>
+            <button id="tabIndicationsBtn" onclick="switchTab('indications')" class="tab-btn py-3 px-4 sm:px-6 text-slate-600 hover:text-brand-600 transition flex items-center gap-2 text-sm whitespace-nowrap">
+                <span>🔍 تصنيف الاستطباب</span>
             </button>
         </div>
     </header>
@@ -73,7 +76,7 @@
             <p style="font-size: 10pt; color: #444;">تاريخ الطباعة: <span id="printDate"></span></p>
         </div>
 
-        <!-- تبويب الإدخال -->
+        <!-- 1. تبويب الإدخال -->
         <section id="entryTab" class="block">
             <div class="max-w-2xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200/80">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
@@ -87,7 +90,7 @@
                             <label class="block text-sm font-semibold text-slate-700 mb-1">الرقم الإحصائي *</label>
                             <input type="text" id="recordNumber" required placeholder="أدخل الرقم الإحصائي..." 
                                    oninput="checkAutoSuggest(this.value)" autocomplete="off"
-                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition text-sm">
+                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none transition text-sm">
                             
                             <div id="suggestionCard" class="hidden mt-2 p-3.5 bg-brand-50/90 border border-brand-200 rounded-xl text-xs space-y-2 backdrop-blur-sm transition-all duration-300 shadow-sm">
                                 <div class="flex items-center justify-between font-bold text-brand-800">
@@ -140,28 +143,21 @@
             </div>
         </section>
 
-        <!-- تبويب السجل -->
+        <!-- 2. تبويب السجل -->
         <section id="registerTab" class="hidden">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
                 <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 no-print">
                     <div>
                         <h2 class="text-xl font-bold text-slate-800">السجل المجمع للألبومين</h2>
                     </div>
-                    
                     <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
                         <div class="flex items-center gap-2 border border-slate-200 p-1.5 rounded-xl bg-slate-50 w-full sm:w-auto">
                             <label class="text-xs font-semibold text-slate-600 pr-1">الشهر:</label>
                             <input type="month" id="filterMonth" onchange="renderRegisterTable()" class="px-2.5 py-1 border border-slate-300 rounded-lg text-xs outline-none bg-white flex-1 sm:flex-none">
                             <button onclick="clearFilter()" class="text-xs text-slate-500 hover:text-slate-800 px-1 underline">الكل</button>
                         </div>
-
-                        <button onclick="exportToExcel()" class="flex items-center justify-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex-1 sm:flex-none">
-                            تصدير Excel
-                        </button>
-                        
-                        <button onclick="triggerPrint()" class="flex items-center justify-center gap-1.5 px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-xl shadow-sm transition flex-1 sm:flex-none">
-                            طباعة
-                        </button>
+                        <button onclick="exportToExcel()" class="flex items-center justify-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex-1 sm:flex-none">تصدير Excel</button>
+                        <button onclick="triggerPrint()" class="flex items-center justify-center gap-1.5 px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-xl shadow-sm transition flex-1 sm:flex-none">طباعة</button>
                     </div>
                 </div>
 
@@ -186,9 +182,31 @@
                 </div>
             </div>
         </section>
+
+        <!-- 3. تبويب تصنيف الاستطباب (البحث الذكي) -->
+        <section id="indicationsTab" class="hidden">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200/80 max-w-4xl mx-auto">
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-slate-800 mb-2">الدليل العراقي لاستطبابات الألبومين</h2>
+                    <p class="text-sm text-slate-500 mb-6">محرك بحث ذكي يدعم الكلمات الطبية العربية والإنجليزية وتصحيح الأخطاء الإملائية البسيطة.</p>
+                    
+                    <div class="relative">
+                        <input type="text" id="searchIndication" oninput="filterSmartIndications(this.value)" placeholder="ابحث (مثال: حروق، كبد، كلى، Burns, Ascites)..." 
+                               class="w-full px-5 py-4 pl-12 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition text-sm font-mono shadow-sm" dir="rtl">
+                        <svg class="w-6 h-6 text-brand-500 absolute left-4 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <div id="indicationsResults" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                    <!-- النتائج تظهر هنا -->
+                </div>
+            </div>
+        </section>
     </main>
 
-    <!-- نافذة التعديل -->
+    <!-- النوافذ المنبثقة -->
     <div id="editModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl border border-slate-100 p-6 space-y-4">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -233,7 +251,6 @@
         </div>
     </div>
 
-    <!-- نافذة الرسائل المخصصة -->
     <div id="customModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl border border-slate-100 p-6 text-center space-y-4">
             <div id="modalIcon" class="w-12 h-12 rounded-full mx-auto flex items-center justify-center text-xl"></div>
@@ -243,17 +260,17 @@
         </div>
     </div>
 
-    <!-- مكتبات Firebase -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // تسجيل Service Worker لتفعيل التثبيت (PWA)
+        // تسجيل Service Worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error:', err));
         }
 
-        // إعدادات Firebase الخاصة بك
+        // Firebase Setup
         const firebaseConfig = {
             apiKey: "AIzaSyAWIfG8ZSyKdzq_BcKOAZsi-dcQ8xpQF58",
             authDomain: "albumintrak.firebaseapp.com",
@@ -263,59 +280,43 @@
             appId: "1:393068393466:web:ee944450b85cf1d9576a43"
         };
 
-        let db = null;
-        let isFirebaseInitialized = false;
-
+        let db = null; let isFirebaseInitialized = false;
         try {
             firebase.initializeApp(firebaseConfig);
             db = firebase.firestore();
-            
-            db.enablePersistence()
-                .then(() => {
-                    isFirebaseInitialized = true;
-                    startRealtimeSync(); 
-                })
-                .catch((err) => {
-                    isFirebaseInitialized = true;
-                    startRealtimeSync(); 
-                });
-        } catch (e) {
-            console.error("خطأ في تهيئة Firebase:", e);
-        }
+            db.enablePersistence().then(() => {
+                isFirebaseInitialized = true; startRealtimeSync(); 
+            }).catch((err) => {
+                isFirebaseInitialized = true; startRealtimeSync(); 
+            });
+        } catch (e) { console.error("Firebase Error:", e); }
 
         function startRealtimeSync() {
             if (!db) return;
-            
             db.collection('albumin_orders').onSnapshot((snapshot) => {
                 const cloudRecords = [];
-                snapshot.forEach((doc) => {
-                    cloudRecords.push(doc.data());
-                });
-                
+                snapshot.forEach((doc) => { cloudRecords.push(doc.data()); });
                 saveLocalRecords(cloudRecords);
-                
                 if (!document.getElementById('registerTab').classList.contains('hidden')) {
                     renderRegisterTable();
                 }
-            }, (error) => {
-                console.error("خطأ في المزامنة اللحظية: ", error);
-            });
+            }, (error) => {});
         }
 
         document.getElementById('orderDate').value = new Date().toISOString().slice(0, 10);
         let currentSuggestionData = null;
 
         function switchTab(tab) {
-            const entryTab = document.getElementById('entryTab'); const registerTab = document.getElementById('registerTab');
-            const tabEntryBtn = document.getElementById('tabEntryBtn'); const tabRegisterBtn = document.getElementById('tabRegisterBtn');
-            if (tab === 'entry') {
-                entryTab.classList.remove('hidden'); registerTab.classList.add('hidden');
-                tabEntryBtn.classList.add('active'); tabRegisterBtn.classList.remove('active');
-            } else {
-                entryTab.classList.add('hidden'); registerTab.classList.remove('hidden');
-                tabRegisterBtn.classList.add('active'); tabEntryBtn.classList.remove('active');
-                renderRegisterTable();
-            }
+            const tabs = ['entry', 'register', 'indications'];
+            tabs.forEach(t => {
+                document.getElementById(t + 'Tab').classList.add('hidden');
+                document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1) + 'Btn').classList.remove('active');
+            });
+            document.getElementById(tab + 'Tab').classList.remove('hidden');
+            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1) + 'Btn').classList.add('active');
+            
+            if (tab === 'register') renderRegisterTable();
+            if (tab === 'indications') filterSmartIndications('');
         }
 
         function getLocalRecords() { return JSON.parse(localStorage.getItem('albumintrak_records') || '[]'); }
@@ -333,7 +334,6 @@
                 card.classList.remove('hidden');
             } else { card.classList.add('hidden'); currentSuggestionData = null; }
         }
-
         function applySuggestion() {
             if (currentSuggestionData) {
                 document.getElementById('patientName').value = currentSuggestionData.patientName;
@@ -347,7 +347,6 @@
         async function handleFormSubmit(e) {
             e.preventDefault();
             const fullDate = document.getElementById('orderDate').value; 
-            const monthYear = fullDate.substring(0, 7); 
             const record = {
                 id: Date.now().toString(),
                 patientName: document.getElementById('patientName').value.trim(),
@@ -356,20 +355,14 @@
                 diagnosis: document.getElementById('diagnosis').value.trim(),
                 doctorName: document.getElementById('doctorName').value.trim(),
                 orderDate: fullDate,
-                monthYear: monthYear,
-                isUploaded: false // الحالة الافتراضية للموقف
+                monthYear: fullDate.substring(0, 7),
+                isUploaded: false
             };
             
-            const records = getLocalRecords(); 
-            records.push(record); 
-            saveLocalRecords(records);
-
+            const records = getLocalRecords(); records.push(record); saveLocalRecords(records);
             if (isFirebaseInitialized && db) {
-                try {
-                    await db.collection('albumin_orders').doc(record.id).set(record);
-                } catch (err) {}
+                try { await db.collection('albumin_orders').doc(record.id).set(record); } catch (err) {}
             }
-
             showModal('success', 'تم الحفظ بنجاح', 'تم تسجيل طلب صرف الألبومين بنجاح.');
             document.getElementById('patientForm').reset();
             document.getElementById('orderDate').value = new Date().toISOString().slice(0, 10);
@@ -396,8 +389,6 @@
                     if (day && !ex.days.includes(day)) ex.days.push(day); 
                 }
             });
-
-            // تحديد ما إذا كانت جميع السجلات داخل المجموعة قد تم رفعها
             return Array.from(map.values()).map(group => {
                 group.isUploaded = group.rawItems.every(r => r.isUploaded === true);
                 return group;
@@ -415,9 +406,7 @@
 
             tb.innerHTML = data.map((item, i) => {
                 const sortedDays = item.days.sort((a,b) => parseInt(a) - parseInt(b)).join(' ، ');
-                // تغيير لون الصف إذا كان الموقف "مرفوع"
                 const rowClass = item.isUploaded ? "bg-emerald-50/60 transition border-b border-slate-100" : "hover:bg-slate-50 transition border-b border-slate-100";
-                
                 return `
                 <tr class="${rowClass}">
                     <td class="p-3.5 text-xs text-slate-400">${i + 1}</td>
@@ -428,15 +417,9 @@
                     <td class="p-3.5 text-xs text-center font-bold text-slate-600" dir="ltr">${sortedDays}</td>
                     <td class="p-3.5"><span class="px-2 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">${item.totalQuantity}</span></td>
                     <td class="p-3.5 text-xs font-mono">${item.monthYear}</td>
-                    
-                    <!-- عمود رفع الموقف -->
                     <td class="p-3.5 text-center no-print">
-                        ${item.isUploaded 
-                            ? `<span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-700">✓ تم الرفع</span>` 
-                            : `<button onclick="markAsUploaded('${item.ids.join(',')}')" class="px-3 py-1.5 bg-slate-100 hover:bg-emerald-500 hover:text-white text-slate-600 font-bold text-xs rounded-lg shadow-sm transition">رفع الموقف</button>`
-                        }
+                        ${item.isUploaded ? `<span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-700">✓ تم الرفع</span>` : `<button onclick="markAsUploaded('${item.ids.join(',')}')" class="px-3 py-1.5 bg-slate-100 hover:bg-emerald-500 hover:text-white text-slate-600 font-bold text-xs rounded-lg shadow-sm transition">رفع الموقف</button>`}
                     </td>
-
                     <td class="p-3.5 text-center no-print">
                         <button onclick="openEditModal('${item.rawItems[0].id}')" class="text-brand-600 mx-1 font-bold">تعديل</button>
                         <button onclick="confirmDelete('${item.ids.join(',')}')" class="text-rose-600 mx-1 font-bold">حذف</button>
@@ -445,32 +428,105 @@
             }).join('');
         }
 
-        // دالة تغيير الموقف
         async function markAsUploaded(idsStr) {
             const ids = idsStr.split(',');
             let recs = getLocalRecords();
-            
-            // تحديث محلي
-            recs = recs.map(r => {
-                if (ids.includes(r.id)) r.isUploaded = true;
-                return r;
-            });
+            recs = recs.map(r => { if (ids.includes(r.id)) r.isUploaded = true; return r; });
             saveLocalRecords(recs);
-
-            // تحديث سحابي
             if (isFirebaseInitialized && db) {
-                for (const id of ids) {
-                    try {
-                        await db.collection('albumin_orders').doc(id).update({ isUploaded: true });
-                    } catch (e) {}
-                }
+                for (const id of ids) { try { await db.collection('albumin_orders').doc(id).update({ isUploaded: true }); } catch (e) {} }
             }
-
-            renderRegisterTable(); // إعادة رسم الجدول لتحديث اللون والحالة
+            renderRegisterTable(); 
         }
 
         function clearFilter() { document.getElementById('filterMonth').value = ''; renderRegisterTable(); }
 
+        // --- محرك البحث الذكي (Smart Search) ---
+        // دالة لتوحيد الأحرف العربية لإلغاء تأثير الأخطاء الإملائية والهمزات
+        function normalizeArabic(text) {
+            return text.replace(/[أإآ]/g, 'ا')
+                       .replace(/ة/g, 'ه')
+                       .replace(/ي/g, 'ى')
+                       .replace(/[\u064B-\u065F]/g, '') // إزالة التشكيل
+                       .toLowerCase();
+        }
+
+        // قاعدة بيانات الاستطبابات + الكلمات الدلالية (المرادفات العربية والطبية)
+        const indicationsData = [
+            { category: "موصى به بشدة (Highly Indicated)", color: "text-emerald-700 bg-emerald-50 border-emerald-200", text: "Large Volume Paracentesis in patients with cirrhosis and refractory ascites associated with portal hypertension (>4 L removed with documented cirrhosis)", dose: "Albumin 20%: 6-8g for every liter of ascitic fluid removed", keywords: "كبد تشمع استسقاء سحب سوائل بطن سيروسيس cirrhosis liver fluid ascites" },
+            { category: "موصى به بشدة (Highly Indicated)", color: "text-emerald-700 bg-emerald-50 border-emerald-200", text: "Malnutrition syndromes: (patients with diarrhea associated with enteral feeding intolerance if significant diarrhea > 2 liters per day AND Serum albumin is < 2 g/dl)", dose: "", keywords: "سوء تغذيه اسهال تغذيه دياريا diarrhea nutrition malnutrition" },
+            { category: "موصى به بشدة (Highly Indicated)", color: "text-emerald-700 bg-emerald-50 border-emerald-200", text: "Ascites not responsive to diuretics. (if serum albumin < 2 g/dL)", dose: "", keywords: "استسقاء مدررات سوائل البطن كبد ascites diuretics" },
+            { category: "موصى به بشدة (Highly Indicated)", color: "text-emerald-700 bg-emerald-50 border-emerald-200", text: "Burns: (not in the resuscitation phase in the first 24 hours after burn injuries)", dose: "", keywords: "حروق حرق نار burn burns" },
+            { category: "موصى به بشدة (Highly Indicated)", color: "text-emerald-700 bg-emerald-50 border-emerald-200", text: "Hyperbilirubinemia of the newborns", dose: "", keywords: "يرقان ابو صفار صفار اطفال حديثي الولاده خديج طب اطفال jaundice newborn baby" },
+            { category: "موصى به بشدة (Highly Indicated)", color: "text-emerald-700 bg-emerald-50 border-emerald-200", text: "Plasma exchange (with isotonic solutions)", dose: "", keywords: "تبديل بلازما تغيير بلازما غسيل دم plasma exchange" },
+            { category: "موصى به بشدة (Highly Indicated)", color: "text-emerald-700 bg-emerald-50 border-emerald-200", text: "Severe hypoalbuminaemia with low plasma volume and generalized oedema where salt and water restriction with plasma volume expansion are required", dose: "", keywords: "نقص الالبومين وذمه تورم احتباس سوائل edema swelling" },
+            { category: "محتمل التوصية (Likely Indicated)", color: "text-blue-700 bg-blue-50 border-blue-200", text: "Plasmapheresis", dose: "Based on plasma volume and serum fibrinogen level", keywords: "فصاده البلازما فصل بلازما" },
+            { category: "محتمل التوصية (Likely Indicated)", color: "text-blue-700 bg-blue-50 border-blue-200", text: "For diagnosis of Suspected HRS", dose: "Albumin: 1g/kg/day for 2 days (max 100g/day)", keywords: "متلازمه كبديه كلويه كلى كبد renal kidney liver hrs" },
+            { category: "محتمل التوصية (Likely Indicated)", color: "text-blue-700 bg-blue-50 border-blue-200", text: "Hepatorenal Syndrome (HRS), confirmed (Serum creatinine > 1.5 mg/dL in cirrhosis...)", dose: "Albumin: 25-50g/day for a total of 72 hrs", keywords: "متلازمه كبديه كلويه كلى كبد renal kidney liver hrs" },
+            { category: "محتمل التوصية (Likely Indicated)", color: "text-blue-700 bg-blue-50 border-blue-200", text: "Postoperative volume resuscitation after Cardiac Surgery, or major surgery in the liver or bowel", dose: "", keywords: "جراحه قلب عمليات كبرى امعاء قلب كبد heart bowel surgery" },
+            { category: "محتمل التوصية (Likely Indicated)", color: "text-blue-700 bg-blue-50 border-blue-200", text: "Spontaneous Bacterial Peritonitis (SBP) and cirrhosis", dose: "Albumin: 1.5 g/kg within 6-hrs (day 1), and 1g/kg on day 3", keywords: "التهاب بريتوني تسمم بكتيريا كبد infection sbp peritonitis" },
+            { category: "محتمل التوصية (Likely Indicated)", color: "text-blue-700 bg-blue-50 border-blue-200", text: "Major Hepatic Resection (>40% resected)", dose: "Albumin, 25 gm/day until albumin is >= 2.5 gm/dL", keywords: "قص كبد استئصال كبد جراحه كبد liver resection" },
+            { category: "محتمل التوصية (Likely Indicated)", color: "text-blue-700 bg-blue-50 border-blue-200", text: "Postoperative Liver Transplant", dose: "Albumin, 25 gm/day until albumin is >= 2.5 gm/dL", keywords: "زراعه كبد زرع كبد liver transplant" },
+            { category: "فائدة مشكوك فيها (Doubtful benefit)", color: "text-amber-700 bg-amber-50 border-amber-200", text: "Severe (acute) Nephrotic Syndrome", dose: "Albumin, 25 gm in combination with diuretics. Approved by nephrologist", keywords: "متلازمه كلويه كلى بروتين كليه kidney renal nephrotic" },
+            { category: "فائدة مشكوك فيها (Doubtful benefit)", color: "text-amber-700 bg-amber-50 border-amber-200", text: "Acute nephrosis/chronic glomerularnephritis and subsequent hypoalbuminemia", dose: "", keywords: "التهاب كلى كليه kidney renal nephritis" },
+            { category: "غير موصى به (Not Indicated)", color: "text-rose-700 bg-rose-50 border-rose-200", text: "Albuminaemia > 2.5 g/dL (with the exception of particular listed cases)", dose: "", keywords: "الالبومين طبيعي طبيعي normal" },
+            { category: "غير موصى به (Not Indicated)", color: "text-rose-700 bg-rose-50 border-rose-200", text: "Acute Respiratory Distress Syndrome", dose: "", keywords: "تنفس ضيق تنفس متلازمه تنفسيه ards respiratory" },
+            { category: "غير موصى به (Not Indicated)", color: "text-rose-700 bg-rose-50 border-rose-200", text: "Septic Shock", dose: "", keywords: "صدمه تسمميه صدمه تعفن دم septic shock" },
+            { category: "غير موصى به (Not Indicated)", color: "text-rose-700 bg-rose-50 border-rose-200", text: "Hypovolemic, bleeding and hemorrhagic shock (unless as second choice)", dose: "", keywords: "صدمه نزفيه نزيف فقدان دم نقص سوائل bleeding shock hemorrhagic" },
+            { category: "غير موصى به (Not Indicated)", color: "text-rose-700 bg-rose-50 border-rose-200", text: "Non haemorrhagic shock", dose: "", keywords: "صدمه غير نزفيه shock" },
+            { category: "غير موصى به (Not Indicated)", color: "text-rose-700 bg-rose-50 border-rose-200", text: "Traumatic Brain Injury", dose: "", keywords: "اصابه دماغ راس جلطه دماغيه ضربه راس brain injury trauma" },
+            { category: "غير موصى به (Not Indicated)", color: "text-rose-700 bg-rose-50 border-rose-200", text: "Cerebral ischaemia", dose: "", keywords: "نقص ترويه دماغيه جلطه راس cerebral ischemia" },
+            { category: "غير موصى به (Not Indicated)", color: "text-rose-700 bg-rose-50 border-rose-200", text: "Major Trauma", dose: "", keywords: "صدمه كبرى اصابات بليغه حوادث trauma" },
+            { category: "غير موصى به (Not Indicated)", color: "text-rose-700 bg-rose-50 border-rose-200", text: "Wound healing", dose: "", keywords: "شفاء جروح التئام جرح wound healing" },
+            { category: "غير موصى به (Not Indicated)", color: "text-rose-700 bg-rose-50 border-rose-200", text: "Hypoalbuminemia in the absence of oedema and acute hypotension", dose: "", keywords: "نقص البومين بدون وذمه او انخفاض ضغط" },
+            { category: "غير موصى به (Not Indicated)", color: "text-rose-700 bg-rose-50 border-rose-200", text: "Ascites responsive to diuretics", dose: "", keywords: "استسقاء يستجيب للمدررات بطن ascites" },
+            { category: "غير موصى به (Not Indicated)", color: "text-rose-700 bg-rose-50 border-rose-200", text: "Kidney Transplant", dose: "", keywords: "زراعه كلى زرع كلى kidney transplant" },
+            { category: "غير موصى به (Not Indicated)", color: "text-rose-700 bg-rose-50 border-rose-200", text: "Abdominal Compartment Syndrome", dose: "", keywords: "متلازمه الحيز البطني ضغط بطن abdominal" },
+            { category: "غير موصى به (Not Indicated)", color: "text-rose-700 bg-rose-50 border-rose-200", text: "Burns; in the first 24 hours after burn injuries", dose: "", keywords: "حروق اول 24 ساعه بدايه الحرق burn burns" },
+            { category: "غير موصى به (Not Indicated)", color: "text-rose-700 bg-rose-50 border-rose-200", text: "The use of albumin in the immediate post-operative period is never advised for any other type of operation", dose: "", keywords: "بعد العمليه الجراحيه مباشره بوست اوبرتف post operative" },
+            { category: "غير موصى به (Not Indicated)", color: "text-rose-700 bg-rose-50 border-rose-200", text: "Acute normovolaemic haemodilution in surgery", dose: "", keywords: "تخفيف الدم اثناء الجراحه surgery" },
+            { category: "غير موصى به (Not Indicated)", color: "text-rose-700 bg-rose-50 border-rose-200", text: "Malnutrition", dose: "", keywords: "سوء تغذيه بدون اسهال تغذيه malnutrition" },
+            { category: "غير موصى به (Not Indicated)", color: "text-rose-700 bg-rose-50 border-rose-200", text: "Protein-losing enteropathies and malabsorption", dose: "", keywords: "سوء امتصاص فقدان بروتين امعاء malabsorption" },
+            { category: "غير موصى به (Not Indicated)", color: "text-rose-700 bg-rose-50 border-rose-200", text: "Acute or chronic pancreatitis", dose: "", keywords: "التهاب بنكرياس حاد او مزمن pancreatitis" },
+            { category: "غير موصى به (Not Indicated)", color: "text-rose-700 bg-rose-50 border-rose-200", text: "Haemodialysis with no evidence of malnutrition", dose: "", keywords: "غسيل كلى ديلزه بدون سوء تغذيه hemodialysis dialysis" },
+            { category: "غير موصى به (Not Indicated)", color: "text-rose-700 bg-rose-50 border-rose-200", text: "Ovarian hyperstimulation syndrome", dose: "", keywords: "متلازمه فرط تنبيه المبيض نسائيه ovarian" }
+        ];
+
+        function renderIndications(dataToRender) {
+            const resultsDiv = document.getElementById('indicationsResults');
+            if (dataToRender.length === 0) {
+                resultsDiv.innerHTML = `<div class="text-center py-6 text-slate-500">لا توجد نتائج مطابقة لبحثك</div>`;
+                return;
+            }
+            resultsDiv.innerHTML = dataToRender.map(item => `
+                <div class="p-4 rounded-xl border ${item.color} shadow-sm">
+                    <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-extrabold bg-white/60 mb-2 border ${item.color.split(' ')[2]}">${item.category}</span>
+                    <p class="text-sm font-semibold mb-1" dir="ltr">${item.text}</p>
+                    ${item.dose ? `<p class="text-xs mt-2 pt-2 border-t border-black/10" dir="ltr"><strong class="font-bold">Dose:</strong> ${item.dose}</p>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // دالة الفلترة الذكية
+        function filterSmartIndications(query) {
+            if (!query.trim()) {
+                renderIndications(indicationsData); // عرض الكل في حال كان البحث فارغ
+                return;
+            }
+
+            const normalizedQuery = normalizeArabic(query.trim());
+            const queryWords = normalizedQuery.split(/\s+/); // تقسيم البحث إلى كلمات متفرقة
+
+            const filtered = indicationsData.filter(item => {
+                const searchableString = normalizeArabic(`${item.text} ${item.category} ${item.keywords}`);
+                // شرط الظهور: يجب أن تكون جميع كلمات البحث موجودة في الجملة الشاملة (حتى لو كانت غير متتالية)
+                return queryWords.every(word => searchableString.includes(word));
+            });
+
+            renderIndications(filtered);
+        }
+
+        // Modal Functions
         function openEditModal(id) {
             const rec = getLocalRecords().find(r => r.id === id);
             if (!rec) return;
@@ -480,51 +536,27 @@
             document.getElementById('editOrderDate').value = rec.orderDate; document.getElementById('editModal').classList.remove('hidden');
         }
         function closeEditModal() { document.getElementById('editModal').classList.add('hidden'); }
-        
         async function handleEditSubmit(e) {
-            e.preventDefault(); 
-            const id = document.getElementById('editRecordId').value; 
-            let recs = getLocalRecords();
+            e.preventDefault(); const id = document.getElementById('editRecordId').value; let recs = getLocalRecords();
             const idx = recs.findIndex(r => r.id === id);
-            
             if (idx !== -1) {
                 const newDate = document.getElementById('editOrderDate').value;
-                recs[idx].patientName = document.getElementById('editPatientName').value; 
-                recs[idx].recordNumber = document.getElementById('editRecordNumber').value;
-                recs[idx].quantity = parseInt(document.getElementById('editQuantity').value); 
-                recs[idx].diagnosis = document.getElementById('editDiagnosis').value;
-                recs[idx].doctorName = document.getElementById('editDoctorName').value; 
-                recs[idx].orderDate = newDate; 
-                recs[idx].monthYear = newDate.substring(0, 7);
-                
+                recs[idx].patientName = document.getElementById('editPatientName').value; recs[idx].recordNumber = document.getElementById('editRecordNumber').value;
+                recs[idx].quantity = parseInt(document.getElementById('editQuantity').value); recs[idx].diagnosis = document.getElementById('editDiagnosis').value;
+                recs[idx].doctorName = document.getElementById('editDoctorName').value; recs[idx].orderDate = newDate; recs[idx].monthYear = newDate.substring(0, 7);
                 saveLocalRecords(recs); 
-                
-                if (isFirebaseInitialized && db) {
-                    try { await db.collection('albumin_orders').doc(id).update(recs[idx]); } catch (err) {}
-                }
-
-                renderRegisterTable(); 
-                closeEditModal(); 
-                showModal('success', 'تم', 'تم حفظ التعديلات.');
+                if (isFirebaseInitialized && db) { try { await db.collection('albumin_orders').doc(id).update(recs[idx]); } catch (err) {} }
+                renderRegisterTable(); closeEditModal(); showModal('success', 'تم', 'تم حفظ التعديلات.');
             }
         }
-
         function confirmDelete(idsStr) {
             const ids = idsStr.split(',');
             showConfirmModal('تأكيد الحذف', 'هل أنت متأكد من حذف هذا السجل نهائياً؟', () => {
                 saveLocalRecords(getLocalRecords().filter(r => !ids.includes(r.id)));
-                
-                if (isFirebaseInitialized && db) {
-                    ids.forEach(id => {
-                        try { db.collection('albumin_orders').doc(id).delete(); } catch(err) {}
-                    });
-                }
-
-                renderRegisterTable(); 
-                showModal('success', 'تم الحذف', 'تم حذف السجل بنجاح.');
+                if (isFirebaseInitialized && db) { ids.forEach(id => { try { db.collection('albumin_orders').doc(id).delete(); } catch(err) {} }); }
+                renderRegisterTable(); showModal('success', 'تم الحذف', 'تم حذف السجل بنجاح.');
             });
         }
-
         function showModal(type, title, msg) {
             document.getElementById('modalTitle').innerText = title; document.getElementById('modalMessage').innerText = msg;
             const icon = document.getElementById('modalIcon');
@@ -537,38 +569,21 @@
             document.getElementById('modalTitle').innerText = title; document.getElementById('modalMessage').innerText = msg;
             const icon = document.getElementById('modalIcon'); icon.className = "w-12 h-12 rounded-full mx-auto flex items-center justify-center bg-rose-100 text-rose-600"; icon.innerHTML = "⚠️";
             window.pendingConfirmAction = onConfirm;
-            document.getElementById('modalActions').innerHTML = `
-                <button onclick="document.getElementById('customModal').classList.add('hidden')" class="px-4 py-2 bg-slate-100 text-slate-700 font-semibold text-xs rounded-xl">إلغاء</button>
-                <button onclick="if(window.pendingConfirmAction)window.pendingConfirmAction(); document.getElementById('customModal').classList.add('hidden')" class="px-4 py-2 bg-rose-600 text-white font-bold text-xs rounded-xl shadow-sm">تأكيد الحذف</button>`;
+            document.getElementById('modalActions').innerHTML = `<button onclick="document.getElementById('customModal').classList.add('hidden')" class="px-4 py-2 bg-slate-100 text-slate-700 font-semibold text-xs rounded-xl">إلغاء</button><button onclick="if(window.pendingConfirmAction)window.pendingConfirmAction(); document.getElementById('customModal').classList.add('hidden')" class="px-4 py-2 bg-rose-600 text-white font-bold text-xs rounded-xl shadow-sm">تأكيد الحذف</button>`;
             document.getElementById('customModal').classList.remove('hidden');
         }
-
         function exportToExcel() {
             const data = aggregateRecords(getLocalRecords());
             if (!data.length) return showModal('error', 'فارغ', 'لا توجد بيانات للتصدير');
-            const rows = data.map((item, idx) => ({
-                "ت": idx+1, 
-                "اسم المريض": item.patientName, 
-                "الرقم الإحصائي": item.recordNumber, 
-                "التشخيص": item.diagnoses.join(' / '), 
-                "الطبيب": item.doctors.join(' - '), 
-                "أيام الصرف": item.days.sort((a,b)=>a-b).join(' ، '), 
-                "العدد (فيال)": item.totalQuantity, 
-                "الشهر/السنة": item.monthYear,
-                "موقف الرفع": item.isUploaded ? "تم الرفع" : "غير مرفوع"
-            }));
+            const rows = data.map((item, idx) => ({"ت": idx+1, "اسم المريض": item.patientName, "الرقم الإحصائي": item.recordNumber, "التشخيص": item.diagnoses.join(' / '), "الطبيب": item.doctors.join(' - '), "أيام الصرف": item.days.sort((a,b)=>a-b).join(' ، '), "العدد (فيال)": item.totalQuantity, "الشهر/السنة": item.monthYear, "موقف الرفع": item.isUploaded ? "تم الرفع" : "غير مرفوع"}));
             const ws = XLSX.utils.json_to_sheet(rows); ws['!dir'] = "rtl";
             const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "سجل الألبومين");
             XLSX.writeFile(wb, `AlbuminTrak_${new Date().toISOString().slice(0, 10)}.xlsx`);
         }
-        function triggerPrint() {
-            document.getElementById('printDate').innerText = new Date().toLocaleDateString('ar-IQ');
-            window.print();
-        }
+        function triggerPrint() { document.getElementById('printDate').innerText = new Date().toLocaleDateString('ar-IQ'); window.print(); }
 
         window.addEventListener('online', updateOnlineStatus);
         window.addEventListener('offline', updateOnlineStatus);
-
         function updateOnlineStatus() {
             const statusEl = document.getElementById('syncStatus');
             const statusText = document.getElementById('statusText');
@@ -577,9 +592,12 @@
                 statusText.innerText = "متصل بالسحابة";
             } else {
                 statusEl.className = "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 shadow-sm";
-                statusText.innerText = "يعمل محلياً (Offline)";
+                statusText.innerText = "يعمل أوفلاين";
             }
         }
+        
+        // عرض جميع الاستطبابات بشكل افتراضي عند الفتح
+        window.onload = () => filterSmartIndications('');
     </script>
 </body>
 </html>
